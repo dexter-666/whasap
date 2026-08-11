@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secretario IA 24/7 - Panel de Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="glow-bg"></div>
+
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            <path d="M8 9h8"></path>
+            <path d="M8 13h6"></path>
+          </svg>
+        </div>
+        <div>
+          <h1>Secretario WhatsApp 24/7</h1>
+          <p class="subtitle">Asistente y Clon Inteligente con Gemini AI</p>
+        </div>
+      </div>
+
+      <div class="status-badge" id="statusBadge">
+        <span class="status-dot"></span>
+        <span id="statusText">Conectando...</span>
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <div class="dashboard-grid">
+      
+      <!-- Left Column: WhatsApp Pairing & Status -->
+      <div class="card qr-card">
+        <div class="card-header">
+          <h2>📱 Conexión de WhatsApp</h2>
+          <span class="badge" id="phoneBadge">Sin vincular</span>
+        </div>
+
+        <div class="qr-container" id="qrContainer">
+          <div class="qr-box" id="qrBox">
+            <div class="qr-spinner"></div>
+            <p>Generando código QR...</p>
+          </div>
+          <div class="connected-box" id="connectedBox" style="display: none;">
+            <div class="check-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <h3 id="connectedName">WhatsApp Conectado</h3>
+            <p id="connectedPhone">+51 000 000 000</p>
+            <div class="info-tip">
+              💡 Puedes enviar <code>.ayuda</code> en tu propio chat de WhatsApp para controlarlo desde tu celular.
+            </div>
+          </div>
+        </div>
+
+        <div class="qr-instructions">
+          <h4>¿Cómo vincular?</h4>
+          <ol>
+            <li>Abre <b>WhatsApp</b> en tu teléfono.</li>
+            <li>Toca en <b>Ajustes / Menú</b> (⋮) > <b>Dispositivos vinculados</b>.</li>
+            <li>Toca en <b>Vincular un dispositivo</b> y apunta la cámara a este código QR.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Center Column: Quick Controls & Modes -->
+      <div class="card controls-card">
+        <div class="card-header">
+          <h2>⚙️ Configuración Rápida</h2>
+        </div>
+
+        <!-- Master Switch -->
+        <div class="setting-item master-toggle">
+          <div>
+            <label class="toggle-title">Estado del Asistente</label>
+            <p class="toggle-desc">Activa o pausa las respuestas automáticas</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="enabledToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <!-- Mode Selector -->
+        <div class="mode-selector">
+          <label class="section-label">Modo de Operación</label>
+          <div class="mode-buttons">
+            <button class="mode-btn active" id="btnModeSecretario" onclick="setMode('secretario')">
+              <div class="mode-icon">👔</div>
+              <div class="mode-info">
+                <span class="mode-name">Modo Secretario</span>
+                <span class="mode-hint">Formal, toma recados y te avisa</span>
+              </div>
+            </button>
+            <button class="mode-btn" id="btnModeClon" onclick="setMode('clon')">
+              <div class="mode-icon">🎭</div>
+              <div class="mode-info">
+                <span class="mode-name">Modo Clon</span>
+                <span class="mode-hint">Respuestas cortas como tú</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Form fields -->
+        <div class="form-group">
+          <label>Nombre del Asistente / Secretaria:</label>
+          <input type="text" id="assistantNameInput" placeholder="Ej: Lucía / Asistente Virtual">
+        </div>
+
+        <div class="form-group">
+          <label>Tu Nombre (Titular):</label>
+          <input type="text" id="ownerNameInput" placeholder="Ej: Carlos">
+        </div>
+
+        <div class="form-group">
+          <label>Google Gemini API Key:</label>
+          <div class="input-with-btn">
+            <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy...">
+            <button class="btn btn-secondary" onclick="toggleApiKeyVisibility()">👁️</button>
+          </div>
+          <small class="help-link"><a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer">Obtener API Key gratuita de Gemini →</a></small>
+        </div>
+
+        <div class="form-group">
+          <label>Instrucciones Adicionales (Prompt):</label>
+          <textarea id="customInstructionsInput" rows="2" placeholder="Ej: Si preguntan por presupuestos, diles que mañana enviaré los detalles."></textarea>
+        </div>
+
+        <button class="btn btn-primary btn-block" onclick="saveSettingsForm()">💾 Guardar Configuración</button>
+      </div>
+
+    </div>
+
+    <!-- Bottom Section: Live Activity Log -->
+    <div class="card log-card">
+      <div class="card-header">
+        <h2>📜 Registro de Actividad en Tiempo Real</h2>
+        <div class="log-actions">
+          <button class="btn btn-sm btn-secondary" onclick="clearMemory()">🧹 Limpiar Memoria IA</button>
+        </div>
+      </div>
+      <div class="log-console" id="logConsole">
+        <div class="log-entry log-info">Iniciando sistema...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

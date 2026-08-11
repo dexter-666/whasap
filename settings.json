@@ -1,0 +1,20 @@
+{
+  "enabled": false,
+  "mode": "secretario",
+  "assistantName": "Asistente Virtual",
+  "ownerName": "mi titular",
+  "provider": "gemini",
+  "geminiApiKey": "",
+  "geminiModel": "gemini-2.0-flash",
+  "openRouterApiKey": "",
+  "openRouterModel": "google/gemini-2.0-flash-exp:free",
+  "customInstructions": "",
+  "blacklist": [],
+  "whitelist": [],
+  "whitelistOnly": false,
+  "simulateTyping": true,
+  "typingDelaySeconds": 3,
+  "notifyOwnerOnRecado": true,
+  "ignoreGroups": true,
+  "ignoreStatus": true
+}

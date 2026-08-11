@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: secretario-whatsapp-24-7
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: PORT
+        value: 10000
