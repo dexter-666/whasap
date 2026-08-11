@@ -323,9 +323,10 @@ class WhatsAppClient {
 
             // 8. Notificar recado al titular si está activo
             if (aiResult.hasRecado && config.get('notifyOwnerOnRecado') && ownJid) {
+              const displayPhone = realPhone || senderPhone;
               const recadoAlert = `📋 *NUEVO RECADO RECIBIDO* 📋
 ━━━━━━━━━━━━━━━━━━━━
-👤 *Contacto:* ${contactPushName} (+${senderPhone})
+👤 *Contacto:* ${contactPushName} (+${displayPhone})
 📝 *Recado:* ${aiResult.recadoText}
 💬 *Mensaje combinado:* "${combinedText}"
 ⏰ *Hora:* ${new Date().toLocaleTimeString()}
