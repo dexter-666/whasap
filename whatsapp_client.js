@@ -303,6 +303,9 @@ class WhatsAppClient {
           this.addLog('error', `Error procesando mensaje: ${err.message}`);
         }
       }, 4500);
+    } catch (err) {
+      console.error('Error general in processIncomingMessage:', err);
+    }
   }
 }
 
