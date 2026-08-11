@@ -299,8 +299,17 @@ class WhatsAppClient {
             await new Promise(r => setTimeout(r, actualDelay));
           }
 
+          // Determinar si es un contacto guardado (agregado)
+          const realPhone = this.getPhoneFromJid(remoteJid);
+          const realPhoneJid = realPhone ? `${realPhone}@s.whatsapp.net` : null;
+          const contactInfo = (this.sock?.contacts?.[remoteJid]) || 
+                              (realPhoneJid && this.sock?.contacts?.[realPhoneJid]);
+          const isSavedContact = !!(contactInfo && contactInfo.name);
+
+          console.log(`[DEBUG] generateResponse: remoteJid=${remoteJid}, isSavedContact=${isSavedContact}`);
+
           // 7. Generar respuesta con IA
-          const aiResult = await aiService.generateResponse(remoteJid, contactPushName, combinedText);
+          const aiResult = await aiService.generateResponse(remoteJid, contactPushName, combinedText, isSavedContact);
 
           if (aiResult && aiResult.replyText) {
             // Enviar respuesta citando el último mensaje
