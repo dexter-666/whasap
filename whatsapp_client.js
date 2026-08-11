@@ -35,6 +35,27 @@ class WhatsAppClient {
     this.messageQueues = new Map(); // jid -> { timeoutId, messages: [{ text, msg }] }
   }
 
+  getPhoneFromJid(jid) {
+    if (!jid) return null;
+    const clean = (id) => id.split('@')[0].split(':')[0];
+    
+    if (jid.endsWith('@s.whatsapp.net')) {
+      return clean(jid);
+    }
+    
+    if (jid.endsWith('@lid')) {
+      const contacts = this.sock?.contacts || {};
+      for (const cJid of Object.keys(contacts)) {
+        const contact = contacts[cJid];
+        if (contact.lid === jid && contact.id) {
+          return clean(contact.id);
+        }
+      }
+    }
+    
+    return null;
+  }
+
   onStateChange(callback) {
     this.listeners.add(callback);
     return () => this.listeners.delete(callback);
@@ -229,8 +250,9 @@ class WhatsAppClient {
 
       // 4. Verificar Lista Negra (Blacklist)
       const senderPhone = remoteJid.split('@')[0];
-      if (config.isBlacklisted(senderPhone)) {
-        console.log(`[Blacklist] Mensaje ignorado de: ${senderPhone}`);
+      const realPhone = this.getPhoneFromJid(remoteJid);
+      if (config.isBlacklisted(senderPhone) || (realPhone && config.isBlacklisted(realPhone))) {
+        console.log(`[Blacklist] Mensaje ignorado de: ${senderPhone} (real: ${realPhone})`);
         return;
       }
 
@@ -265,7 +287,9 @@ class WhatsAppClient {
           const lastMsg = messagesToProcess[messagesToProcess.length - 1].msg;
           const contactPushName = lastMsg.pushName || 'Amigo';
 
-          this.addLog('message', `Procesando mensajes agrupados de ${contactPushName} (+${senderPhone}): "${combinedText.slice(0, 80)}..." (${messagesToProcess.length} msgs)`);
+          this.addLog('message', `Procesando mensajes agrupados de ${contactPushName} (+${senderPhone}): "${combinedText.slice(0, 80)}..." (${messagesToProcess.length} msgs)`, {
+            recipient: senderPhone
+          });
 
           // 6. Simular escritura humana
           if (config.get('simulateTyping')) {

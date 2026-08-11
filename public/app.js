@@ -197,8 +197,50 @@ function renderLogs(logs) {
 
   consoleEl.innerHTML = logs.map(log => {
     const time = new Date(log.timestamp).toLocaleTimeString();
-    return `<div class="log-entry log-${log.type}">[${time}] ${escapeHtml(log.message)}</div>`;
+    
+    let actionBtn = '';
+    if (log.type === 'message' && log.details?.recipient) {
+      const recipient = log.details.recipient;
+      const isAlreadyIgnored = currentSettings.blacklist && currentSettings.blacklist.includes(recipient);
+      if (isAlreadyIgnored) {
+        actionBtn = ` <button class="btn-success-light" onclick="removeFromBlacklist('${recipient}')">✅ Permitir</button>`;
+      } else {
+        actionBtn = ` <button class="btn-danger-light" onclick="addToBlacklist('${recipient}')">🚫 Ignorar</button>`;
+      }
+    }
+    
+    return `<div class="log-entry log-${log.type}">[${time}] ${escapeHtml(log.message)}${actionBtn}</div>`;
   }).join('');
+}
+
+async function addToBlacklist(number) {
+  try {
+    const res = await fetch('/api/action/blacklist/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ number })
+    });
+    if (res.ok) {
+      fetchStatus();
+    }
+  } catch (err) {
+    console.error('Error al ignorar número:', err);
+  }
+}
+
+async function removeFromBlacklist(number) {
+  try {
+    const res = await fetch('/api/action/blacklist/remove', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ number })
+    });
+    if (res.ok) {
+      fetchStatus();
+    }
+  } catch (err) {
+    console.error('Error al permitir número:', err);
+  }
 }
 
 function escapeHtml(str) {

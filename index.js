@@ -39,6 +39,26 @@ app.post('/api/action/clear-history', (req, res) => {
   res.json({ success: true });
 });
 
+// API: Añadir número a la lista negra
+app.post('/api/action/blacklist/add', (req, res) => {
+  const { number } = req.body;
+  if (!number) return res.status(400).json({ success: false, error: 'Número requerido' });
+  const added = config.addToBlacklist(number);
+  waClient.addLog('info', `Número +${number} añadido a la lista de ignorados.`);
+  waClient.notifyListeners();
+  res.json({ success: true, added });
+});
+
+// API: Eliminar número de la lista negra
+app.post('/api/action/blacklist/remove', (req, res) => {
+  const { number } = req.body;
+  if (!number) return res.status(400).json({ success: false, error: 'Número requerido' });
+  const removed = config.removeFromBlacklist(number);
+  waClient.addLog('info', `Número +${number} removido de la lista de ignorados.`);
+  waClient.notifyListeners();
+  res.json({ success: true, removed });
+});
+
 // API: Server-Sent Events (SSE) para actualizaciones en vivo del QR y estado
 app.get('/api/events', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
