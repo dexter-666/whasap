@@ -17,6 +17,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const AUTH_FOLDER = path.join(__dirname, 'auth_session');
 
+const cleanPhone = (jid) => {
+  if (!jid || typeof jid !== 'string') return null;
+  return jid.split('@')[0].split(':')[0].replace(/[^0-9]/g, '');
+};
+
 class WhatsAppClient {
   constructor() {
     this.sock = null;
@@ -193,12 +198,15 @@ class WhatsAppClient {
       const ownJid = this.sock.user?.id ? jidNormalizedUser(this.sock.user.id) : null;
       const isFromMe = msg.key.fromMe;
       const normalizedRemoteJid = jidNormalizedUser(remoteJid);
-      const isSelfChat = isFromMe && ownJid && normalizedRemoteJid === ownJid;
+      
+      const ownPhone = cleanPhone(ownJid);
+      const remotePhone = cleanPhone(normalizedRemoteJid);
+      const isSelfChat = ownPhone && remotePhone && ownPhone === remotePhone;
 
       // 1. Manejo de comandos desde tu propio chat
       if (isSelfChat) {
         if (text.trim().startsWith('.')) {
-          this.addLog('command', `Comando recibido: ${text.trim()}`);
+          this.addLog('command', `Comando recibido en chat propio: ${text.trim()}`);
           await handleCommand(this.sock, normalizedRemoteJid, text);
         }
         return;
