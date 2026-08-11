@@ -220,7 +220,7 @@ IMPORTANTE: Si el usuario te deja un recado claro o algo importante para ${owner
       }))
     ];
 
-    const response = await fetch('https://api.groq.com/openapi/v1/chat/completions', {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
