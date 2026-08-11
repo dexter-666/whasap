@@ -27,6 +27,7 @@ class WhatsAppClient {
     this.activityLogs = [];
     this.listeners = new Set();
     this.reconnectAttempts = 0;
+    this.messageQueues = new Map(); // jid -> { timeoutId, messages: [{ text, msg }] }
   }
 
   onStateChange(callback) {
@@ -218,51 +219,79 @@ class WhatsAppClient {
         return;
       }
 
-      // 5. Obtener nombre del contacto
-      const contactPushName = msg.pushName || 'Amigo';
-      this.addLog('message', `Mensaje recibido de ${contactPushName} (+${senderPhone}): "${text.slice(0, 60)}"`);
-
-      // 6. Simular que se está escribiendo (typing simulation)
-      if (config.get('simulateTyping')) {
-        await this.sock.sendPresenceUpdate('composing', remoteJid);
-        const delaySeconds = config.get('typingDelaySeconds') || 3;
-        // Variación aleatoria de +- 1 segundo para naturalidad
-        const actualDelay = Math.max(1000, (delaySeconds * 1000) + (Math.random() * 1500 - 500));
-        await new Promise(r => setTimeout(r, actualDelay));
+      // 5. Cooldown / Acumulador de mensajes (Debouncer)
+      // Si el contacto envía varios mensajes seguidos, los agrupamos y enviamos un solo prompt
+      if (!this.messageQueues.has(remoteJid)) {
+        this.messageQueues.set(remoteJid, {
+          timeoutId: null,
+          messages: []
+        });
       }
 
-      // 7. Generar respuesta con IA
-      const aiResult = await aiService.generateResponse(remoteJid, contactPushName, text);
+      const queue = this.messageQueues.get(remoteJid);
+      queue.messages.push({ text, msg });
 
-      if (aiResult && aiResult.replyText) {
-        // Enviar respuesta al contacto
-        await this.sock.sendMessage(remoteJid, { text: aiResult.replyText }, { quoted: msg });
-        await this.sock.sendPresenceUpdate('paused', remoteJid);
+      // Cancelar el temporizador anterior
+      if (queue.timeoutId) {
+        clearTimeout(queue.timeoutId);
+      }
 
-        this.addLog('message', `Respuesta enviada a ${contactPushName}: "${aiResult.replyText}"`, {
-          mode: aiResult.mode,
-          recipient: senderPhone
-        });
+      // Esperar 4.5 segundos para agrupar mensajes
+      queue.timeoutId = setTimeout(async () => {
+        try {
+          const currentQueue = this.messageQueues.get(remoteJid);
+          if (!currentQueue || currentQueue.messages.length === 0) return;
 
-        // 8. Si es modo secretario y se detectó un recado importante, notificar al dueño en su propio chat
-        if (aiResult.hasRecado && config.get('notifyOwnerOnRecado') && ownJid) {
-          const recadoAlert = `📋 *NUEVO RECADO RECIBIDO* 📋
+          const messagesToProcess = [...currentQueue.messages];
+          this.messageQueues.delete(remoteJid); // Limpiar la cola
+
+          // Combinar todos los textos recibidos en este lapso
+          const combinedText = messagesToProcess.map(m => m.text).join('\n');
+          const lastMsg = messagesToProcess[messagesToProcess.length - 1].msg;
+          const contactPushName = lastMsg.pushName || 'Amigo';
+
+          this.addLog('message', `Procesando mensajes agrupados de ${contactPushName} (+${senderPhone}): "${combinedText.slice(0, 80)}..." (${messagesToProcess.length} msgs)`);
+
+          // 6. Simular escritura humana
+          if (config.get('simulateTyping')) {
+            await this.sock.sendPresenceUpdate('composing', remoteJid);
+            const delaySeconds = config.get('typingDelaySeconds') || 3;
+            const actualDelay = Math.max(1000, (delaySeconds * 1000) + (Math.random() * 1500 - 500));
+            await new Promise(r => setTimeout(r, actualDelay));
+          }
+
+          // 7. Generar respuesta con IA
+          const aiResult = await aiService.generateResponse(remoteJid, contactPushName, combinedText);
+
+          if (aiResult && aiResult.replyText) {
+            // Enviar respuesta citando el último mensaje
+            await this.sock.sendMessage(remoteJid, { text: aiResult.replyText }, { quoted: lastMsg });
+            await this.sock.sendPresenceUpdate('paused', remoteJid);
+
+            this.addLog('message', `Respuesta enviada a ${contactPushName}: "${aiResult.replyText}"`, {
+              mode: aiResult.mode,
+              recipient: senderPhone
+            });
+
+            // 8. Notificar recado al titular si está activo
+            if (aiResult.hasRecado && config.get('notifyOwnerOnRecado') && ownJid) {
+              const recadoAlert = `📋 *NUEVO RECADO RECIBIDO* 📋
 ━━━━━━━━━━━━━━━━━━━━
 👤 *Contacto:* ${contactPushName} (+${senderPhone})
 📝 *Recado:* ${aiResult.recadoText}
-💬 *Último mensaje:* "${text}"
+💬 *Mensaje combinado:* "${combinedText}"
 ⏰ *Hora:* ${new Date().toLocaleTimeString()}
 ━━━━━━━━━━━━━━━━━━━━`;
-          
-          await this.sock.sendMessage(ownJid, { text: recadoAlert });
-          this.addLog('recado', `Recado guardado de ${contactPushName}: ${aiResult.recadoText}`);
-        }
-      }
 
-    } catch (err) {
-      console.error('Error procesando mensaje entrante:', err);
-      this.addLog('error', `Error procesando mensaje: ${err.message}`);
-    }
+              await this.sock.sendMessage(ownJid, { text: recadoAlert });
+              this.addLog('recado', `Recado guardado de ${contactPushName}: ${aiResult.recadoText}`);
+            }
+          }
+        } catch (err) {
+          console.error('Error procesando cola de mensajes:', err);
+          this.addLog('error', `Error procesando mensaje: ${err.message}`);
+        }
+      }, 4500);
   }
 }
 
