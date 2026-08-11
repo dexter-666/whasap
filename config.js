@@ -14,11 +14,13 @@ const DEFAULT_SETTINGS = {
   mode: 'secretario',                   // 'secretario' o 'clon'
   assistantName: 'Asistente Virtual',  // Nombre del asistente
   ownerName: 'mi titular',              // Cómo se refiere al dueño
-  provider: 'gemini',                   // 'gemini' o 'openrouter'
+  provider: 'gemini',                   // 'gemini' o 'openrouter' o 'groq'
   geminiApiKey: process.env.GEMINI_API_KEY || '',
-  geminiModel: 'gemini-3.5-flash',
+  geminiModel: 'gemini-2.0-flash',
   openRouterApiKey: process.env.OPENROUTER_API_KEY || '',
   openRouterModel: 'google/gemini-2.0-flash-exp:free',
+  groqApiKey: process.env.GROQ_API_KEY || '',
+  groqModel: 'llama-3.3-70b-versatile',
   customInstructions: '',               // Instrucciones adicionales personalizadas
   blacklist: [],                        // Lista de números ignorados (formato internacional ej: 51999888777)
   whitelist: [],                        // Lista de números permitidos si whitelistOnly es true

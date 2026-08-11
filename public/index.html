@@ -125,12 +125,68 @@
         </div>
 
         <div class="form-group">
-          <label>Google Gemini API Key:</label>
-          <div class="input-with-btn">
-            <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy...">
-            <button class="btn btn-secondary" onclick="toggleApiKeyVisibility()">👁️</button>
+          <label>Proveedor de IA:</label>
+          <select id="providerSelect" onchange="toggleProviderFields()">
+            <option value="gemini">Google Gemini (Oficial)</option>
+            <option value="openrouter">OpenRouter (Multimodelo)</option>
+            <option value="groq">Groq (Llama 3 - Ultra Rápido)</option>
+          </select>
+        </div>
+
+        <!-- Campos de Gemini -->
+        <div id="geminiFields" class="provider-fields">
+          <div class="form-group">
+            <label>Google Gemini API Key:</label>
+            <div class="input-with-btn">
+              <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy...">
+              <button class="btn btn-secondary" onclick="toggleApiKeyVisibility('geminiApiKeyInput')">👁️</button>
+            </div>
+            <small class="help-link"><a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer">Obtener API Key gratuita de Gemini →</a></small>
           </div>
-          <small class="help-link"><a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer">Obtener API Key gratuita de Gemini →</a></small>
+          <div class="form-group">
+            <label>Modelo Gemini:</label>
+            <select id="geminiModelSelect">
+              <option value="gemini-2.0-flash">gemini-2.0-flash (Recomendado)</option>
+              <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+              <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Campos de OpenRouter -->
+        <div id="openRouterFields" class="provider-fields" style="display: none;">
+          <div class="form-group">
+            <label>OpenRouter API Key:</label>
+            <div class="input-with-btn">
+              <input type="password" id="openRouterApiKeyInput" placeholder="sk-or-v1-...">
+              <button class="btn btn-secondary" onclick="toggleApiKeyVisibility('openRouterApiKeyInput')">👁️</button>
+            </div>
+            <small class="help-link"><a href="https://openrouter.ai/keys" target="_blank" rel="noreferrer">Obtener API Key de OpenRouter →</a></small>
+          </div>
+          <div class="form-group">
+            <label>Modelo OpenRouter:</label>
+            <input type="text" id="openRouterModelInput" placeholder="Ej: google/gemini-2.0-flash-exp:free">
+          </div>
+        </div>
+
+        <!-- Campos de Groq -->
+        <div id="groqFields" class="provider-fields" style="display: none;">
+          <div class="form-group">
+            <label>Groq API Key:</label>
+            <div class="input-with-btn">
+              <input type="password" id="groqApiKeyInput" placeholder="gsk_...">
+              <button class="btn btn-secondary" onclick="toggleApiKeyVisibility('groqApiKeyInput')">👁️</button>
+            </div>
+            <small class="help-link"><a href="https://console.groq.com/keys" target="_blank" rel="noreferrer">Obtener API Key de Groq →</a></small>
+          </div>
+          <div class="form-group">
+            <label>Modelo Groq:</label>
+            <select id="groqModelSelect">
+              <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (Recomendado)</option>
+              <option value="llama-3.1-8b-instant">llama-3.1-8b-instant</option>
+              <option value="mixtral-8x7b-32768">mixtral-8x7b-32768</option>
+            </select>
+          </div>
         </div>
 
         <div class="form-group">

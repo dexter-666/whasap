@@ -52,7 +52,7 @@ REGLAS ESTRICTAS DE RESPUESTA:
 3. PROHIBIDO hablar como un bot de atención al cliente (NUNCA digas "¿En qué puedo ayudarte?", "Soy una IA", "Estimado cliente").
 4. Pocos o ningún emoji (máximo 1 solo si encaja de forma muy natural).
 5. Si te preguntan algo muy específico o compromisos que no sabes con certeza, di de forma casual que estás algo ocupado en este momento y que más tardecito le escribes con calma.
-6. El contacto que te escribe se llama: "${contactName || 'Amigo'}".
+6. El contacto que te escribe se llama: "${contactName || 'Amigo'}". No repitas saludos de bienvenida ni digas su nombre en cada mensaje; solo saluda al inicio si es natural, y en los siguientes mensajes responde directamente y sé muy natural.
 ${custom ? `INSTRUCCIONES ADICIONALES DEL DUEÑO: ${custom}` : ''}`;
     }
 
@@ -65,7 +65,7 @@ REGLAS ESTRICTAS DE RESPUESTA:
 3. Informa amablemente que ${ownerName} no se encuentra disponible ahora mismo y pregunta en qué puedes ayudarle o si desea dejarle un recado/mensaje importante.
 4. Si la persona ya te da su mensaje o recado, agradécele y confírmale que ya lo anotaste y se lo harás llegar a ${ownerName} en cuanto se desocupe.
 5. Puedes usar algún emoji amable (como 📋, ✨, 👍) pero sin exagerar.
-6. El contacto que te escribe se llama: "${contactName || 'un contacto'}".
+6. El contacto que te escribe se llama: "${contactName || 'un contacto'}". No repitas saludos de bienvenida ni te presentes de nuevo en cada mensaje si ya están conversando; responde directamente a lo que te dice.
 ${custom ? `INSTRUCCIONES ADICIONALES DEL DUEÑO: ${custom}` : ''}
 
 IMPORTANTE: Si el usuario te deja un recado claro o algo importante para ${ownerName}, añade al final de tu respuesta EXACTAMENTE esta etiqueta oculta con el resumen (no alteres el formato):
@@ -93,6 +93,8 @@ IMPORTANTE: Si el usuario te deja un recado claro o algo importante para ${owner
         rawResponse = await this.callGemini(systemPrompt, history);
       } else if (provider === 'openrouter') {
         rawResponse = await this.callOpenRouter(systemPrompt, history);
+      } else if (provider === 'groq') {
+        rawResponse = await this.callGroq(systemPrompt, history);
       } else {
         throw new Error(`Proveedor desconocido: ${provider}`);
       }
@@ -196,6 +198,45 @@ IMPORTANTE: Si el usuario te deja un recado claro o algo importante para ${owner
     if (!response.ok) {
       const errText = await response.text();
       throw new Error(`OpenRouter API error ${response.status}: ${errText}`);
+    }
+
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content?.trim() || '';
+  }
+
+  async callGroq(systemPrompt, history) {
+    const apiKey = config.get('groqApiKey') || process.env.GROQ_API_KEY;
+    if (!apiKey) {
+      throw new Error('GROQ_API_KEY no configurada. Añádela en tu archivo .env o en settings.json.');
+    }
+
+    const modelName = config.get('groqModel') || 'llama-3.3-70b-versatile';
+
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      ...history.map(item => ({
+        role: item.role === 'model' ? 'assistant' : 'user',
+        content: item.parts[0].text
+      }))
+    ];
+
+    const response = await fetch('https://api.groq.com/openapi/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: modelName,
+        messages: messages,
+        max_tokens: 250,
+        temperature: 0.7
+      })
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Groq API error ${response.status}: ${errText}`);
     }
 
     const data = await response.json();

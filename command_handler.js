@@ -41,7 +41,7 @@ export async function handleCommand(sock, senderJid, text) {
 • *.limpiar* → Borra la memoria temporal de las conversaciones.
 
 *Motor de IA:*
-• *.modelo [gemini/openrouter]* → Cambia el proveedor de IA.`;
+• *.modelo [gemini/openrouter/groq]* → Cambia el proveedor de IA.`;
       break;
 
     case 'on':
@@ -179,11 +179,11 @@ ${customInst ? `• *Instrucciones extra:* "${customInst}"` : '• *Instruccione
 
     case 'modelo':
       const targetProvider = arg.toLowerCase();
-      if (targetProvider === 'gemini' || targetProvider === 'openrouter') {
+      if (targetProvider === 'gemini' || targetProvider === 'openrouter' || targetProvider === 'groq') {
         config.set('provider', targetProvider);
         responseMessage = `⚡ Proveedor de IA cambiado a: *${targetProvider.toUpperCase()}*`;
       } else {
-        responseMessage = `⚠️ Proveedor inválido. Opciones disponibles:\n• *.modelo gemini*\n• *.modelo openrouter*`;
+        responseMessage = `⚠️ Proveedor inválido. Opciones disponibles:\n• *.modelo gemini*\n• *.modelo openrouter*\n• *.modelo groq*`;
       }
       break;
 

@@ -67,9 +67,33 @@ function updateUI(data) {
   document.getElementById('assistantNameInput').value = settings?.assistantName || '';
   document.getElementById('ownerNameInput').value = settings?.ownerName || '';
   document.getElementById('customInstructionsInput').value = settings?.customInstructions || '';
+  
+  if (settings?.provider) {
+    document.getElementById('providerSelect').value = settings.provider;
+  }
+  
   if (settings?.geminiApiKey && !document.getElementById('geminiApiKeyInput').value) {
     document.getElementById('geminiApiKeyInput').value = settings.geminiApiKey;
   }
+  if (settings?.geminiModel) {
+    document.getElementById('geminiModelSelect').value = settings.geminiModel;
+  }
+  
+  if (settings?.openRouterApiKey && !document.getElementById('openRouterApiKeyInput').value) {
+    document.getElementById('openRouterApiKeyInput').value = settings.openRouterApiKey;
+  }
+  if (settings?.openRouterModel) {
+    document.getElementById('openRouterModelInput').value = settings.openRouterModel;
+  }
+  
+  if (settings?.groqApiKey && !document.getElementById('groqApiKeyInput').value) {
+    document.getElementById('groqApiKeyInput').value = settings.groqApiKey;
+  }
+  if (settings?.groqModel) {
+    document.getElementById('groqModelSelect').value = settings.groqModel;
+  }
+  
+  toggleProviderFields();
 
   // Mode buttons
   setModeVisual(settings?.mode || 'secretario');
@@ -121,7 +145,13 @@ document.getElementById('enabledToggle').addEventListener('change', async (e) =>
 async function saveSettingsForm() {
   const assistantName = document.getElementById('assistantNameInput').value.trim();
   const ownerName = document.getElementById('ownerNameInput').value.trim();
+  const provider = document.getElementById('providerSelect').value;
   const geminiApiKey = document.getElementById('geminiApiKeyInput').value.trim();
+  const geminiModel = document.getElementById('geminiModelSelect').value;
+  const openRouterApiKey = document.getElementById('openRouterApiKeyInput').value.trim();
+  const openRouterModel = document.getElementById('openRouterModelInput').value.trim();
+  const groqApiKey = document.getElementById('groqApiKeyInput').value.trim();
+  const groqModel = document.getElementById('groqModelSelect').value;
   const customInstructions = document.getElementById('customInstructionsInput').value.trim();
 
   try {
@@ -131,7 +161,13 @@ async function saveSettingsForm() {
       body: JSON.stringify({
         assistantName,
         ownerName,
+        provider,
         geminiApiKey,
+        geminiModel,
+        openRouterApiKey,
+        openRouterModel,
+        groqApiKey,
+        groqModel,
         customInstructions
       })
     });
@@ -143,9 +179,16 @@ async function saveSettingsForm() {
   }
 }
 
-function toggleApiKeyVisibility() {
-  const input = document.getElementById('geminiApiKeyInput');
+function toggleApiKeyVisibility(id) {
+  const input = document.getElementById(id);
   input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+function toggleProviderFields() {
+  const provider = document.getElementById('providerSelect').value;
+  document.getElementById('geminiFields').style.display = provider === 'gemini' ? 'block' : 'none';
+  document.getElementById('openRouterFields').style.display = provider === 'openrouter' ? 'block' : 'none';
+  document.getElementById('groqFields').style.display = provider === 'groq' ? 'block' : 'none';
 }
 
 function renderLogs(logs) {
