@@ -16,7 +16,7 @@ const DEFAULT_SETTINGS = {
   ownerName: 'mi titular',              // Cómo se refiere al dueño
   provider: 'gemini',                   // 'gemini' o 'openrouter'
   geminiApiKey: process.env.GEMINI_API_KEY || '',
-  geminiModel: 'gemini-1.5-flash',
+  geminiModel: 'gemini-3.5-flash',
   openRouterApiKey: process.env.OPENROUTER_API_KEY || '',
   openRouterModel: 'google/gemini-2.0-flash-exp:free',
   customInstructions: '',               // Instrucciones adicionales personalizadas

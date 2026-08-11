@@ -5,7 +5,7 @@
   "ownerName": "mi titular",
   "provider": "gemini",
   "geminiApiKey": "",
-  "geminiModel": "gemini-1.5-flash",
+  "geminiModel": "gemini-3.5-flash",
   "openRouterApiKey": "",
   "openRouterModel": "google/gemini-2.0-flash-exp:free",
   "customInstructions": "",

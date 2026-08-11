@@ -132,7 +132,7 @@ IMPORTANTE: Si el usuario te deja un recado claro o algo importante para ${owner
       throw new Error('GEMINI_API_KEY no configurada. Añádela en tu archivo .env o en settings.json.');
     }
 
-    const modelName = config.get('geminiModel') || 'gemini-1.5-flash';
+    const modelName = config.get('geminiModel') || 'gemini-3.5-flash';
     const genAI = new GoogleGenerativeAI(apiKey);
 
     const model = genAI.getGenerativeModel({
