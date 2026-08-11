@@ -122,7 +122,7 @@ IMPORTANTE: Si el usuario te deja un recado claro o algo importante para ${owner
       console.error(`[AI Error] Error generando respuesta para ${jid}:`, error.message);
       // Quitar el último mensaje del historial si falló
       history.pop();
-      return null;
+      throw error;
     }
   }
 
@@ -132,7 +132,7 @@ IMPORTANTE: Si el usuario te deja un recado claro o algo importante para ${owner
       throw new Error('GEMINI_API_KEY no configurada. Añádela en tu archivo .env o en settings.json.');
     }
 
-    const modelName = config.get('geminiModel') || 'gemini-2.0-flash';
+    const modelName = config.get('geminiModel') || 'gemini-1.5-flash';
     const genAI = new GoogleGenerativeAI(apiKey);
 
     const model = genAI.getGenerativeModel({
