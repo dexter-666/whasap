@@ -197,14 +197,18 @@ class WhatsAppClient {
 
       const userJidRaw = this.sock.user?.id || this.sock.authState?.creds?.me?.id;
       const ownJid = userJidRaw ? jidNormalizedUser(userJidRaw) : null;
+      const ownLidRaw = this.sock.user?.lid || this.sock.authState?.creds?.me?.lid;
+      const ownLid = ownLidRaw ? jidNormalizedUser(ownLidRaw) : null;
       const isFromMe = msg.key.fromMe;
       const normalizedRemoteJid = jidNormalizedUser(remoteJid);
       
       const ownPhone = cleanPhone(ownJid);
       const remotePhone = cleanPhone(normalizedRemoteJid);
-      const isSelfChat = ownPhone && remotePhone && ownPhone === remotePhone;
+      const isSelfChat = (ownPhone && remotePhone && ownPhone === remotePhone) ||
+                         (ownLid && normalizedRemoteJid === ownLid) ||
+                         (ownJid && normalizedRemoteJid === ownJid);
 
-      console.log(`[DEBUG] processIncomingMessage: remoteJid=${remoteJid}, isFromMe=${isFromMe}, ownPhone=${ownPhone}, remotePhone=${remotePhone}, isSelfChat=${isSelfChat}, textStartsWithDot=${text.trim().startsWith('.')}`);
+      console.log(`[DEBUG] processIncomingMessage: remoteJid=${remoteJid}, isFromMe=${isFromMe}, ownPhone=${ownPhone}, remotePhone=${remotePhone}, ownLid=${ownLid}, isSelfChat=${isSelfChat}, textStartsWithDot=${text.trim().startsWith('.')}`);
 
       // 1. Manejo de comandos desde tu propio chat
       if (isSelfChat) {
