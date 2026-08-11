@@ -195,13 +195,16 @@ class WhatsAppClient {
 
       if (!text || typeof text !== 'string') return;
 
-      const ownJid = this.sock.user?.id ? jidNormalizedUser(this.sock.user.id) : null;
+      const userJidRaw = this.sock.user?.id || this.sock.authState?.creds?.me?.id;
+      const ownJid = userJidRaw ? jidNormalizedUser(userJidRaw) : null;
       const isFromMe = msg.key.fromMe;
       const normalizedRemoteJid = jidNormalizedUser(remoteJid);
       
       const ownPhone = cleanPhone(ownJid);
       const remotePhone = cleanPhone(normalizedRemoteJid);
       const isSelfChat = ownPhone && remotePhone && ownPhone === remotePhone;
+
+      console.log(`[DEBUG] processIncomingMessage: remoteJid=${remoteJid}, isFromMe=${isFromMe}, ownPhone=${ownPhone}, remotePhone=${remotePhone}, isSelfChat=${isSelfChat}, textStartsWithDot=${text.trim().startsWith('.')}`);
 
       // 1. Manejo de comandos desde tu propio chat
       if (isSelfChat) {
