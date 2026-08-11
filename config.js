@@ -79,7 +79,11 @@ class ConfigManager {
 
   isBlacklisted(number) {
     const clean = number.replace(/[^0-9]/g, '');
-    return this.settings.blacklist.some(b => clean.includes(b.replace(/[^0-9]/g, '')));
+    const envBlacklist = process.env.BLACKLIST 
+      ? process.env.BLACKLIST.split(',').map(n => n.trim().replace(/[^0-9]/g, '')).filter(Boolean) 
+      : [];
+    const combinedBlacklist = [...(this.settings.blacklist || []), ...envBlacklist];
+    return combinedBlacklist.some(b => clean.includes(b.replace(/[^0-9]/g, '')));
   }
 
   addToBlacklist(number) {
