@@ -73,9 +73,19 @@ Para dejarlo corriendo 24/7 en la nube con Render:
    - **Start Command**: `npm start`
 6. En la sección **Environment Variables**, añade:
    - `GEMINI_API_KEY`: Tu clave de Gemini.
+   *(Nota: Render define automáticamente `RENDER_EXTERNAL_URL` que el bot usará para realizar un auto-ping cada 10 minutos y mantenerse despierto).*
 7. Haz clic en **Deploy**.
 8. Una vez desplegado, Render te dará un enlace público (ej: `https://secretario-whatsapp.onrender.com`).
 9. Abre ese enlace en tu celular o PC para escanear el QR y vincularlo en la nube.
+
+> [!IMPORTANT]
+> **¿Por qué se duerme el bot al cerrar la página y cómo lo solucionamos?**
+> En los planes gratuitos de **Render**, los servidores web entran en reposo ("sueño") después de 15 minutos de inactividad (cuando nadie visita la web).
+> 
+> Para evitar esto, hemos implementado dos soluciones:
+> 1. **Auto-ping incorporado:** El servidor se pinguea a sí mismo automáticamente cada 10 minutos para reiniciar el temporizador de inactividad de Render. Funciona automáticamente gracias a que Render le provee su propio dominio en la variable `RENDER_EXTERNAL_URL`.
+> 2. **Monitor Externo (Recomendado como respaldo):** Si por alguna razón el bot se apaga o reinicia, el auto-ping interno no se ejecutará. Para garantizar un funcionamiento 24/7, te recomendamos crear una cuenta gratuita en [UptimeRobot](https://uptimerobot.com) o [cron-job.org](https://cron-job.org) y configurar un monitor tipo **HTTP(s)** apuntando a tu URL pública (ej: `https://tu-app.onrender.com/ping`) cada 5 o 10 minutos. Esto forzará al servidor a mantenerse despierto y encenderse de inmediato si se cae.
+
 
 ---
 

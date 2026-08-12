@@ -59,6 +59,11 @@ app.post('/api/action/blacklist/remove', (req, res) => {
   res.json({ success: true, removed });
 });
 
+// API: Endpoint de ping para mantener activo el servidor en Render u otros hosts gratuitos
+app.get('/ping', (req, res) => {
+  res.status(200).send('pong');
+});
+
 // API: Server-Sent Events (SSE) para actualizaciones en vivo del QR y estado
 app.get('/api/events', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
@@ -86,4 +91,27 @@ app.listen(PORT, () => {
 
   // Iniciar cliente de WhatsApp
   waClient.start();
+
+  // Auto-ping para mantener el servidor activo en Render (planes gratuitos)
+  let APP_URL = process.env.RENDER_EXTERNAL_URL || process.env.APP_URL;
+  if (APP_URL) {
+    if (APP_URL.endsWith('/')) {
+      APP_URL = APP_URL.slice(0, -1);
+    }
+    console.log(`[Self-Ping] Activado para: ${APP_URL}`);
+    const pingServer = async () => {
+      try {
+        const response = await fetch(`${APP_URL}/ping`);
+        console.log(`[Self-Ping] Ping exitoso a ${APP_URL}/ping: ${response.status} ${response.statusText}`);
+      } catch (err) {
+        console.error(`[Self-Ping] Error en ping a ${APP_URL}/ping:`, err.message);
+      }
+    };
+    // Primer ping a los 30 segundos
+    setTimeout(pingServer, 30000);
+    // Ping periódico cada 10 minutos (600000 ms)
+    setInterval(pingServer, 10 * 60 * 1000);
+  } else {
+    console.log('[Self-Ping] No configurado. (Establece RENDER_EXTERNAL_URL o APP_URL si estás en Render o similar).');
+  }
 });
